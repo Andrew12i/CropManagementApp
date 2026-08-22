@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="activity_types">
+        <item>Fertilizer application</item>
+        <item>Pesticide application</item>
+        <item>Weeding</item>
+        <item>Irrigation</item>
+        <item>Planting / gap-filling</item>
+        <item>Other</item>
+    </string-array>
+</resources>

@@ -20,12 +20,13 @@
             android:padding="20dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="358dp"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
                 android:textColor="@color/white"
                 android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAlignment="center"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -117,24 +118,6 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
-            <Button
-                android:id="@+id/btnAddCrop"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:backgroundTint="@color/green_primary"
-                android:padding="12dp"
-                android:text="+ Add New Crop"
-                android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/btnViewCrops"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/soil_brown"
-                android:padding="12dp"
-                android:text="View All Crops"
-                android:textColor="@color/white" />
         </LinearLayout>
 
         <!-- Upcoming harvests -->
@@ -144,7 +127,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
-            android:text="Upcoming Harvests (next 14 days)"
+            android:text="Upcoming Harvests (in next 14 days)"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -168,6 +151,36 @@
             android:text="No harvests due in the next 14 days."
             android:textColor="@color/text_secondary"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+
+            <Button
+                android:id="@+id/btnAddCrop"
+                android:layout_width="193dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="@color/green_primary"
+                android:padding="12dp"
+                android:text="+ Add A Crop"
+                android:textColor="@color/white"
+                android:layout_marginEnd="6dp"/>
+
+            <Button
+                android:id="@+id/btnViewCrops"
+                android:layout_width="197dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/soil_brown"
+                android:padding="12dp"
+                android:text="View All Crops"
+                android:textColor="@color/white"
+                android:layout_marginStart="6dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

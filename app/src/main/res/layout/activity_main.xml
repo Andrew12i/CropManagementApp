@@ -169,7 +169,7 @@
                 android:padding="12dp"
                 android:text="+ Add A Crop"
                 android:textColor="@color/white"
-                android:layout_marginEnd="6dp"/>
+                android:layout_marginEnd="8dp"/>
 
             <Button
                 android:id="@+id/btnViewCrops"
@@ -179,7 +179,7 @@
                 android:padding="12dp"
                 android:text="View All Crops"
                 android:textColor="@color/white"
-                android:layout_marginStart="6dp"/>
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
     </LinearLayout>

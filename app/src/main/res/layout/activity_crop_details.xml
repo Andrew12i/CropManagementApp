@@ -74,7 +74,7 @@
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                tools:text="Expected harvest: 01 Oct 2026" />
+                tools:text="Expected harvesting Date: e.g 21 Jan 2027" />
 
             <TextView
                 android:id="@+id/tvAreaPlanted"
@@ -83,7 +83,7 @@
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                tools:text="Area planted: 2 acres" />
+                tools:text="Total space planted e.g plot B" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp"
-                    android:backgroundTint="@color/soil_brown"
+                    android:backgroundTint="@color/text_primary"
                     android:text="Edit"
                     android:textColor="@color/white" />
 

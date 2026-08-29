@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@color/card_white"
-            android:hint="Search by crop name or plot..."
+            android:hint="Search crop by name or plot..."
             android:padding="10dp" />
     </LinearLayout>
 

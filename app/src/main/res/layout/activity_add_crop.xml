@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Plot / field name (e.g. Lower field)"
+            android:hint="Plot / field name (e.g. Plot A)"
             android:inputType="textCapWords" />
 
         <TextView
@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Area planted (e.g. 2 acres)"
+            android:hint="Total Size Planted (e.g. 2 acres)"
             android:inputType="text" />
 
         <Button

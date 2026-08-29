@@ -28,13 +28,6 @@
                 android:textStyle="bold"
                 android:textAlignment="center"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Keep every crop, plot and activity in one place"
-                android:textColor="@color/green_light"
-                android:textSize="13sp" />
         </LinearLayout>
 
         <!-- Summary cards -->
@@ -175,7 +168,7 @@
                 android:id="@+id/btnViewCrops"
                 android:layout_width="197dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/soil_brown"
+                android:backgroundTint="@color/text_primary"
                 android:padding="12dp"
                 android:text="View All Crops"
                 android:textColor="@color/white"

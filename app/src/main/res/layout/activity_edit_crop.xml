@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Plot / field name"
+            android:hint="Plot name"
             android:inputType="textCapWords" />
 
         <TextView
@@ -50,7 +50,7 @@
             android:layout_marginTop="4dp"
             android:backgroundTint="@color/card_white"
             android:gravity="start|center_vertical"
-            android:text="Select planting date"
+            android:text="Planting date"
             android:textColor="@color/text_primary" />
 
         <TextView
@@ -68,7 +68,7 @@
             android:layout_marginTop="4dp"
             android:backgroundTint="@color/card_white"
             android:gravity="start|center_vertical"
-            android:text="Select expected harvest date"
+            android:text="Expected harvest date"
             android:textColor="@color/text_primary" />
 
         <EditText
@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Area planted (e.g. 2 acres)"
+            android:hint="Total planted space e.g 10 acres)"
             android:inputType="text" />
 
         <Button

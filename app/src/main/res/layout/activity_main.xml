@@ -11,26 +11,47 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/green_primary"
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:padding="20dp">
 
-            <TextView
-                android:layout_width="358dp"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textAlignment="center"/>
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Keep every crop, plot and activity in one place"
+                    android:textColor="@color/green_light"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Menu"
+                android:src="@drawable/ic_menu" />
 
         </LinearLayout>
 
-        <!-- Summary cards -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -66,7 +87,7 @@
                         android:layout_height="wrap_content"
                         android:text="Crops tracked"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -98,12 +119,11 @@
                         android:layout_height="wrap_content"
                         android:text="Plots in use"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
-        <!-- Action buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,16 +131,33 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
+            <Button
+                android:id="@+id/btnAddCrop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="@color/green_primary"
+                android:padding="12dp"
+                android:text="+ Add New Crop"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnViewCrops"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/soil_brown"
+                android:padding="12dp"
+                android:text="View All Crops"
+                android:textColor="@color/white" />
         </LinearLayout>
 
-        <!-- Upcoming harvests -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
-            android:text="Upcoming Harvests (in next 14 days)"
+            android:text="Upcoming Harvests (next 14 days)"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -144,36 +181,6 @@
             android:text="No harvests due in the next 14 days."
             android:textColor="@color/text_secondary"
             android:visibility="gone" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
-
-
-            <Button
-                android:id="@+id/btnAddCrop"
-                android:layout_width="193dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:backgroundTint="@color/green_primary"
-                android:padding="12dp"
-                android:text="+ Add A Crop"
-                android:textColor="@color/white"
-                android:layout_marginEnd="8dp"/>
-
-            <Button
-                android:id="@+id/btnViewCrops"
-                android:layout_width="197dp"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/text_primary"
-                android:padding="12dp"
-                android:text="View All Crops"
-                android:textColor="@color/white"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

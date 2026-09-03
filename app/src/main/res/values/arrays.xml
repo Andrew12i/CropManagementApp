@@ -1,9 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="crop_types">
+        <item>Maize</item>
+        <item>Beans</item>
+        <item>Irish Potato</item>
+        <item>Sweet Potato</item>
+        <item>Cassava</item>
+        <item>Sorghum</item>
+        <item>Millet</item>
+        <item>Rice</item>
+        <item>Wheat</item>
+        <item>Banana</item>
+        <item>Avocado</item>
+        <item>Mango</item>
+        <item>Coffee</item>
+        <item>Tea</item>
+        <item>Macadamia</item>
+        <item>Tomato</item>
+        <item>Onion</item>
+        <item>Cabbage</item>
+        <item>Kale (Sukuma Wiki)</item>
+        <item>Spinach</item>
+        <item>Carrot</item>
+        <item>Capsicum / Pepper</item>
+        <item>Pumpkin</item>
+        <item>Watermelon</item>
+        <item>Passion Fruit</item>
+        <item>Pineapple</item>
+        <item>Sugarcane</item>
+        <item>Cotton</item>
+        <item>Sunflower</item>
+        <item>Groundnuts</item>
+        <item>Soybean</item>
+        <item>Green Grams</item>
+        <item>Cowpeas</item>
+        <item>Pigeon Peas</item>
+        <item>Napier Grass</item>
+        <item>Other (specify)</item>
+    </string-array>
+
     <string-array name="activity_types">
         <item>Fertilizer application</item>
         <item>Pesticide application</item>
         <item>Weeding</item>
+        <item>Prooning</item>
         <item>Irrigation</item>
         <item>Planting / gap-filling</item>
         <item>Other</item>

@@ -2,6 +2,9 @@ package com.example.cropmanagementapp;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,20 +16,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
+import com.example.cropmanagementapp.db.ValidationUtils;
 import com.example.cropmanagementapp.model.ActivityLog;
 import com.example.cropmanagementapp.model.Crop;
 
 import java.util.Calendar;
 
-/**
- * Logs a single farm activity (fertilizer, pesticide, weeding, irrigation,
- * etc.) against the crop the user came from.
- */
 public class AddActivityLogActivity extends AppCompatActivity {
 
+    private static final String OTHER_OPTION = "Other";
+
     private Spinner spinnerActivityType;
+    private EditText etCustomActivityType, etExpenseAmount, etNotes;
     private Button btnActivityDate, btnSaveActivity;
-    private EditText etNotes;
     private TextView tvFormTitle;
 
     private String activityDateIso = null;
@@ -42,6 +44,8 @@ public class AddActivityLogActivity extends AppCompatActivity {
         cropId = getIntent().getLongExtra("crop_id", -1);
 
         spinnerActivityType = findViewById(R.id.spinnerActivityType);
+        etCustomActivityType = findViewById(R.id.etCustomActivityType);
+        etExpenseAmount = findViewById(R.id.etExpenseAmount);
         btnActivityDate = findViewById(R.id.btnActivityDate);
         btnSaveActivity = findViewById(R.id.btnSaveActivity);
         etNotes = findViewById(R.id.etNotes);
@@ -51,6 +55,17 @@ public class AddActivityLogActivity extends AppCompatActivity {
                 R.array.activity_types, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerActivityType.setAdapter(adapter);
+
+        spinnerActivityType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                boolean isOther = OTHER_OPTION.equals(spinnerActivityType.getSelectedItem().toString());
+                etCustomActivityType.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
 
         Crop crop = dbHelper.getCrop(cropId);
         if (crop != null) {
@@ -68,9 +83,7 @@ public class AddActivityLogActivity extends AppCompatActivity {
                     activityDateIso = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
                     btnActivityDate.setText(DateUtils.toDisplayFormat(activityDateIso));
                 },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH));
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
         dialog.show();
     }
 
@@ -84,7 +97,32 @@ public class AddActivityLogActivity extends AppCompatActivity {
             return;
         }
 
-        String activityType = spinnerActivityType.getSelectedItem().toString();
+        String selectedType = spinnerActivityType.getSelectedItem().toString();
+        String activityType;
+
+        if (OTHER_OPTION.equals(selectedType)) {
+            activityType = etCustomActivityType.getText().toString().trim();
+            if (TextUtils.isEmpty(activityType)) {
+                etCustomActivityType.setError("Please describe the activity");
+                etCustomActivityType.requestFocus();
+                return;
+            }
+            if (!ValidationUtils.containsLetter(activityType)) {
+                etCustomActivityType.setError("Activity must include letters, not just numbers");
+                etCustomActivityType.requestFocus();
+                return;
+            }
+        } else {
+            activityType = selectedType;
+        }
+
+        String expenseAmount = etExpenseAmount.getText().toString().trim();
+        if (!TextUtils.isEmpty(expenseAmount) && !expenseAmount.matches("\\d+(\\.\\d+)?")) {
+            etExpenseAmount.setError("Enter a valid amount, e.g. 500 or 500.50");
+            etExpenseAmount.requestFocus();
+            return;
+        }
+
         String notes = etNotes.getText().toString().trim();
 
         ActivityLog log = new ActivityLog();
@@ -92,6 +130,7 @@ public class AddActivityLogActivity extends AppCompatActivity {
         log.setActivityType(activityType);
         log.setActivityDate(activityDateIso);
         log.setNotes(notes);
+        log.setExpenseAmount(expenseAmount);
 
         long id = dbHelper.addActivity(log);
         if (id > 0) {

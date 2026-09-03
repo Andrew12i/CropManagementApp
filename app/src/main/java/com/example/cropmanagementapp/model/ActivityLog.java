@@ -1,8 +1,8 @@
 package com.example.cropmanagementapp.model;
 
 /**
- * Represents a single farm activity (fertilizer application, weeding,
- * irrigation, pesticide spraying, etc.) logged against a crop.
+ * Represents a single farm activity logged against a crop, with an
+ * optional expense amount for tracking input costs.
  */
 public class ActivityLog {
 
@@ -11,55 +11,26 @@ public class ActivityLog {
     private String activityType;
     private String activityDate; // stored as yyyy-MM-dd
     private String notes;
+    private String expenseAmount; // free text numeric, e.g. "500" or "500.50"
 
     public ActivityLog() {
     }
 
-    public ActivityLog(long id, long cropId, String activityType, String activityDate, String notes) {
-        this.id = id;
-        this.cropId = cropId;
-        this.activityType = activityType;
-        this.activityDate = activityDate;
-        this.notes = notes;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public long getId() {
-        return id;
-    }
+    public long getCropId() { return cropId; }
+    public void setCropId(long cropId) { this.cropId = cropId; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public String getActivityType() { return activityType; }
+    public void setActivityType(String activityType) { this.activityType = activityType; }
 
-    public long getCropId() {
-        return cropId;
-    }
+    public String getActivityDate() { return activityDate; }
+    public void setActivityDate(String activityDate) { this.activityDate = activityDate; }
 
-    public void setCropId(long cropId) {
-        this.cropId = cropId;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public String getActivityType() {
-        return activityType;
-    }
-
-    public void setActivityType(String activityType) {
-        this.activityType = activityType;
-    }
-
-    public String getActivityDate() {
-        return activityDate;
-    }
-
-    public void setActivityDate(String activityDate) {
-        this.activityDate = activityDate;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
+    public String getExpenseAmount() { return expenseAmount; }
+    public void setExpenseAmount(String expenseAmount) { this.expenseAmount = expenseAmount; }
 }

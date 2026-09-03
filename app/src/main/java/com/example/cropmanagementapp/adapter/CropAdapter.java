@@ -1,24 +1,23 @@
 package com.example.cropmanagementapp.adapter;
 
 import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cropmanagementapp.R;
+import com.example.cropmanagementapp.catalog.CropImageResolver;
 import com.example.cropmanagementapp.db.DateUtils;
 import com.example.cropmanagementapp.model.Crop;
 
 import java.util.List;
 
-/**
- * Binds a list of Crop objects to card rows, showing a colour-coded
- * status badge based on how close the crop is to its expected harvest date.
- */
 public class CropAdapter extends RecyclerView.Adapter<CropAdapter.CropViewHolder> {
 
     public interface OnCropClickListener {
@@ -41,15 +40,21 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.CropViewHolder
     @NonNull
     @Override
     public CropViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_crop, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_crop, parent, false);
         return new CropViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CropViewHolder holder, int position) {
         Crop crop = crops.get(position);
-        holder.tvCropName.setText(crop.getCropName());
+
+        String variety = crop.getVariety();
+        String nameLine = TextUtils.isEmpty(variety) ? crop.getCropName() : crop.getCropName() + " (" + variety + ")";
+        holder.tvCropName.setText(nameLine);
+
+        int imageRes = CropImageResolver.resolve(holder.itemView.getContext(), crop.getCropName(), crop.getCategory());
+        holder.ivCropThumbnail.setImageResource(imageRes);
+
         holder.tvPlotName.setText("Plot: " + crop.getPlotName());
         holder.tvHarvestDate.setText("Harvest: " + DateUtils.toDisplayFormat(crop.getExpectedHarvestDate()));
 
@@ -59,19 +64,19 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.CropViewHolder
 
         if (daysLeft == Integer.MIN_VALUE) {
             badgeText = "-";
-            color = 0xFF9E9E9E;
+            color = 0xFF616161;
         } else if (daysLeft < 0) {
             badgeText = Math.abs(daysLeft) + "d overdue";
-            color = 0xFFC62828; // red
+            color = 0xFFB71C1C;
         } else if (daysLeft == 0) {
             badgeText = "Today!";
-            color = 0xFFF9A825; // amber
+            color = 0xFFE65100;
         } else if (daysLeft <= 7) {
             badgeText = daysLeft + "d left";
-            color = 0xFFF9A825; // amber
+            color = 0xFFE65100;
         } else {
             badgeText = daysLeft + "d left";
-            color = 0xFF2E7D32; // green
+            color = 0xFF1B5E20;
         }
 
         holder.tvStatusBadge.setText(badgeText);
@@ -89,10 +94,12 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.CropViewHolder
     }
 
     static class CropViewHolder extends RecyclerView.ViewHolder {
+        ImageView ivCropThumbnail;
         TextView tvCropName, tvPlotName, tvHarvestDate, tvStatusBadge;
 
         CropViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivCropThumbnail = itemView.findViewById(R.id.ivCropThumbnail);
             tvCropName = itemView.findViewById(R.id.tvCropName);
             tvPlotName = itemView.findViewById(R.id.tvPlotName);
             tvHarvestDate = itemView.findViewById(R.id.tvHarvestDate);

@@ -15,10 +15,6 @@ import com.example.cropmanagementapp.model.ActivityLog;
 
 import java.util.List;
 
-/**
- * Binds the list of farm activities (fertilizer, weeding, irrigation, etc.)
- * logged against a specific crop.
- */
 public class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAdapter.ActivityViewHolder> {
 
     private List<ActivityLog> activities;
@@ -35,8 +31,7 @@ public class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAdapter.
     @NonNull
     @Override
     public ActivityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_activity, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_activity, parent, false);
         return new ActivityViewHolder(view);
     }
 
@@ -45,6 +40,13 @@ public class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAdapter.
         ActivityLog log = activities.get(position);
         holder.tvActivityType.setText(log.getActivityType());
         holder.tvActivityDate.setText(DateUtils.toDisplayFormat(log.getActivityDate()));
+
+        if (!TextUtils.isEmpty(log.getExpenseAmount())) {
+            holder.tvActivityExpense.setText("Spent: KES " + log.getExpenseAmount());
+            holder.tvActivityExpense.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvActivityExpense.setVisibility(View.GONE);
+        }
 
         if (!TextUtils.isEmpty(log.getNotes())) {
             holder.tvActivityNotes.setText(log.getNotes());
@@ -60,12 +62,13 @@ public class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAdapter.
     }
 
     static class ActivityViewHolder extends RecyclerView.ViewHolder {
-        TextView tvActivityType, tvActivityDate, tvActivityNotes;
+        TextView tvActivityType, tvActivityDate, tvActivityExpense, tvActivityNotes;
 
         ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
             tvActivityType = itemView.findViewById(R.id.tvActivityType);
             tvActivityDate = itemView.findViewById(R.id.tvActivityDate);
+            tvActivityExpense = itemView.findViewById(R.id.tvActivityExpense);
             tvActivityNotes = itemView.findViewById(R.id.tvActivityNotes);
         }
     }

@@ -28,6 +28,15 @@
                 tools:text="Maize" />
 
             <TextView
+                android:id="@+id/tvVariety"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/green_light"
+                android:textSize="14sp"
+                tools:text="Variety: Hybrid 614" />
+
+            <TextView
                 android:id="@+id/tvPlotName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -74,7 +83,7 @@
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                tools:text="Expected harvesting Date: e.g 21 Jan 2027" />
+                tools:text="Expected harvest: 01 Oct 2026" />
 
             <TextView
                 android:id="@+id/tvAreaPlanted"
@@ -83,7 +92,36 @@
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                tools:text="Total space planted e.g plot B" />
+                tools:text="Area planted: 2 acres" />
+
+            <TextView
+                android:id="@+id/tvTotalExpenses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/soil_brown"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="Total expenses logged: KES 1200.00" />
+
+            <Button
+                android:id="@+id/btnHarvestAction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:backgroundTint="@color/amber_warning"
+                android:text="Mark as Harvested"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnUndoHarvest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:text="Undo harvest status"
+                android:textColor="@color/red_overdue"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -97,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp"
-                    android:backgroundTint="@color/text_primary"
+                    android:backgroundTint="@color/soil_brown"
                     android:text="Edit"
                     android:textColor="@color/white" />
 
@@ -141,7 +179,7 @@
                     android:backgroundTint="@color/green_primary"
                     android:text="+ Log Activity"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

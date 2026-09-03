@@ -19,12 +19,62 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etCropName"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:hint="Crop name / type (e.g. Maize)"
+            android:text="Crop type"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSelectCrop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:id="@+id/ivSelectedCropImage"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="Selected crop image"
+                    android:src="@drawable/ic_cat_other" />
+
+                <TextView
+                    android:id="@+id/tvSelectedCropName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="Tap to choose a crop"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <EditText
+            android:id="@+id/etVariety"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:hint="Variety (e.g. Hass, Fuerte, local variety)"
             android:inputType="textCapWords" />
 
         <EditText
@@ -32,7 +82,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Plot / field name (e.g. Plot A)"
+            android:hint="Plot / field name (e.g. Lower field)"
             android:inputType="textCapWords" />
 
         <TextView
@@ -41,7 +91,7 @@
             android:layout_marginTop="14dp"
             android:text="Planting date"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnPlantingDate"
@@ -59,7 +109,7 @@
             android:layout_marginTop="14dp"
             android:text="Expected harvest date"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnHarvestDate"
@@ -76,7 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Total Size Planted (e.g. 2 acres)"
+            android:hint="Area planted (e.g. 2 acres)"
             android:inputType="text" />
 
         <Button

@@ -7,69 +7,49 @@ public class Crop {
 
     private long id;
     private String cropName;
+    private String variety;
     private String plotName;
     private String plantingDate;        // stored as yyyy-MM-dd
     private String expectedHarvestDate; // stored as yyyy-MM-dd
     private String areaPlanted;         // free text, e.g. "2 acres"
+    private boolean harvested;
+    private String yieldAmount;         // free text, e.g. "800 kg"
+    private String harvestedDate;       // stored as yyyy-MM-dd
+    private String category;            // e.g. "Cereals", "Vegetables"
 
     public Crop() {
     }
 
-    public Crop(long id, String cropName, String plotName, String plantingDate,
-                String expectedHarvestDate, String areaPlanted) {
-        this.id = id;
-        this.cropName = cropName;
-        this.plotName = plotName;
-        this.plantingDate = plantingDate;
-        this.expectedHarvestDate = expectedHarvestDate;
-        this.areaPlanted = areaPlanted;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public long getId() {
-        return id;
-    }
+    public String getCropName() { return cropName; }
+    public void setCropName(String cropName) { this.cropName = cropName; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public String getVariety() { return variety; }
+    public void setVariety(String variety) { this.variety = variety; }
 
-    public String getCropName() {
-        return cropName;
-    }
+    public String getPlotName() { return plotName; }
+    public void setPlotName(String plotName) { this.plotName = plotName; }
 
-    public void setCropName(String cropName) {
-        this.cropName = cropName;
-    }
+    public String getPlantingDate() { return plantingDate; }
+    public void setPlantingDate(String plantingDate) { this.plantingDate = plantingDate; }
 
-    public String getPlotName() {
-        return plotName;
-    }
+    public String getExpectedHarvestDate() { return expectedHarvestDate; }
+    public void setExpectedHarvestDate(String expectedHarvestDate) { this.expectedHarvestDate = expectedHarvestDate; }
 
-    public void setPlotName(String plotName) {
-        this.plotName = plotName;
-    }
+    public String getAreaPlanted() { return areaPlanted; }
+    public void setAreaPlanted(String areaPlanted) { this.areaPlanted = areaPlanted; }
 
-    public String getPlantingDate() {
-        return plantingDate;
-    }
+    public boolean isHarvested() { return harvested; }
+    public void setHarvested(boolean harvested) { this.harvested = harvested; }
 
-    public void setPlantingDate(String plantingDate) {
-        this.plantingDate = plantingDate;
-    }
+    public String getYieldAmount() { return yieldAmount; }
+    public void setYieldAmount(String yieldAmount) { this.yieldAmount = yieldAmount; }
 
-    public String getExpectedHarvestDate() {
-        return expectedHarvestDate;
-    }
+    public String getHarvestedDate() { return harvestedDate; }
+    public void setHarvestedDate(String harvestedDate) { this.harvestedDate = harvestedDate; }
 
-    public void setExpectedHarvestDate(String expectedHarvestDate) {
-        this.expectedHarvestDate = expectedHarvestDate;
-    }
-
-    public String getAreaPlanted() {
-        return areaPlanted;
-    }
-
-    public void setAreaPlanted(String areaPlanted) {
-        this.areaPlanted = areaPlanted;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }

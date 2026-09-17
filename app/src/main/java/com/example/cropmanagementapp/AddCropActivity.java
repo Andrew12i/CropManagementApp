@@ -33,6 +33,7 @@ public class AddCropActivity extends AppCompatActivity {
 
     private String selectedCropName = null;
     private String selectedCropCategory = null;
+    private String selectedCropImagePath = null;
     private String plantingDateIso = null;
     private String harvestDateIso = null;
 
@@ -69,10 +70,10 @@ public class AddCropActivity extends AppCompatActivity {
         if (requestCode == REQUEST_BROWSE_CROPS && resultCode == RESULT_OK && data != null) {
             selectedCropName = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_NAME);
             selectedCropCategory = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_CATEGORY);
+            selectedCropImagePath = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_IMAGE_PATH);
             tvSelectedCropName.setText(selectedCropName);
             tvSelectedCropName.setTextColor(getResources().getColor(R.color.text_primary));
-            int imageRes = CropImageResolver.resolve(this, selectedCropName, selectedCropCategory);
-            ivSelectedCropImage.setImageResource(imageRes);
+            CropImageResolver.applyCropImage(ivSelectedCropImage, this, selectedCropName, selectedCropCategory, selectedCropImagePath);
         }
     }
 
@@ -155,6 +156,7 @@ public class AddCropActivity extends AppCompatActivity {
         crop.setPlantingDate(plantingDateIso);
         crop.setExpectedHarvestDate(harvestDateIso);
         crop.setAreaPlanted(areaPlanted);
+        crop.setImagePath(selectedCropImagePath);
 
         long id = dbHelper.addCrop(crop);
         if (id > 0) {

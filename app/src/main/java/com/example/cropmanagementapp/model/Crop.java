@@ -16,6 +16,7 @@ public class Crop {
     private String yieldAmount;         // free text, e.g. "800 kg"
     private String harvestedDate;       // stored as yyyy-MM-dd
     private String category;            // e.g. "Cereals", "Vegetables"
+    private String imagePath;           // real photo file path, if one was chosen
 
     public Crop() {
     }
@@ -52,4 +53,7 @@ public class Crop {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 }

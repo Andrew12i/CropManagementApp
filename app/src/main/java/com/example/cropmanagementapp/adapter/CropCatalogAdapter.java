@@ -22,12 +22,19 @@ public class CropCatalogAdapter extends RecyclerView.Adapter<CropCatalogAdapter.
         void onItemClick(CropCatalogItem item);
     }
 
+    public interface OnCatalogItemLongClickListener {
+        void onItemLongClick(CropCatalogItem item);
+    }
+
     private List<CropCatalogItem> items;
     private final OnCatalogItemClickListener listener;
+    private final OnCatalogItemLongClickListener longClickListener;
 
-    public CropCatalogAdapter(List<CropCatalogItem> items, OnCatalogItemClickListener listener) {
+    public CropCatalogAdapter(List<CropCatalogItem> items, OnCatalogItemClickListener listener,
+                              OnCatalogItemLongClickListener longClickListener) {
         this.items = items;
         this.listener = listener;
+        this.longClickListener = longClickListener;
     }
 
     public void updateData(List<CropCatalogItem> newItems) {
@@ -46,11 +53,16 @@ public class CropCatalogAdapter extends RecyclerView.Adapter<CropCatalogAdapter.
     public void onBindViewHolder(@NonNull CatalogViewHolder holder, int position) {
         CropCatalogItem item = items.get(position);
         holder.tvCropName.setText(item.getName());
-        int imageRes = CropImageResolver.resolve(holder.itemView.getContext(), item.getName(), item.getCategory());
-        holder.ivCropImage.setImageResource(imageRes);
+        CropImageResolver.applyCropImage(holder.ivCropImage, holder.itemView.getContext(),
+                item.getName(), item.getCategory(), item.getImagePath());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(item);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) longClickListener.onItemLongClick(item);
+            return true;
         });
     }
 

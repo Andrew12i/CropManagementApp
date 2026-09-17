@@ -52,8 +52,8 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.CropViewHolder
         String nameLine = TextUtils.isEmpty(variety) ? crop.getCropName() : crop.getCropName() + " (" + variety + ")";
         holder.tvCropName.setText(nameLine);
 
-        int imageRes = CropImageResolver.resolve(holder.itemView.getContext(), crop.getCropName(), crop.getCategory());
-        holder.ivCropThumbnail.setImageResource(imageRes);
+        CropImageResolver.applyCropImage(holder.ivCropThumbnail, holder.itemView.getContext(),
+                crop.getCropName(), crop.getCategory(), crop.getImagePath());
 
         holder.tvPlotName.setText("Plot: " + crop.getPlotName());
         holder.tvHarvestDate.setText("Harvest: " + DateUtils.toDisplayFormat(crop.getExpectedHarvestDate()));

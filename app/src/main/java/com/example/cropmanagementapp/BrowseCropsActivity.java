@@ -1,21 +1,20 @@
 package com.example.cropmanagementapp;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.Intent;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,21 +22,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.cropmanagementapp.adapter.CropCatalogAdapter;
 import com.example.cropmanagementapp.catalog.CropCatalog;
 import com.example.cropmanagementapp.catalog.CropCatalogItem;
+import com.example.cropmanagementapp.catalog.ImageStorageUtils;
 import com.example.cropmanagementapp.db.DatabaseHelper;
-import com.example.cropmanagementapp.db.ValidationUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A searchable, category-filtered grid of crops (built-in + farmer-added
- * custom ones) that the Add/Edit Crop screens launch to pick a crop type.
- * Returns the chosen crop's name and category via the result Intent.
+ * custom ones) used to pick a crop type. Long-press any card to change
+ * its photo, delete it (custom crops), or hide it (default crops).
  */
 public class BrowseCropsActivity extends AppCompatActivity {
 
     public static final String EXTRA_CROP_NAME = "crop_name";
     public static final String EXTRA_CROP_CATEGORY = "crop_category";
+    public static final String EXTRA_CROP_IMAGE_PATH = "crop_image_path";
+
+    private static final int REQUEST_PICK_PHOTO_FOR_TYPE = 300;
 
     private DatabaseHelper dbHelper;
     private RecyclerView rvCatalog;
@@ -47,6 +51,7 @@ public class BrowseCropsActivity extends AppCompatActivity {
     private CropCatalogAdapter adapter;
     private List<CropCatalogItem> allItems;
     private String selectedCategory = "All";
+    private String pendingImageCropName = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +65,10 @@ public class BrowseCropsActivity extends AppCompatActivity {
         Button btnAddCustomCrop = findViewById(R.id.btnAddCustomCrop);
 
         rvCatalog.setLayoutManager(new GridLayoutManager(this, 3));
-        adapter = new CropCatalogAdapter(new ArrayList<>(), this::onCropChosen);
+        adapter = new CropCatalogAdapter(new ArrayList<>(), this::onCropChosen, this::onCropLongPressed);
         rvCatalog.setAdapter(adapter);
 
-        loadAllItems();
         buildCategoryFilters();
-        applyFilters();
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -80,14 +83,33 @@ public class BrowseCropsActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) { }
         });
 
-        btnAddCustomCrop.setOnClickListener(v -> showAddCustomCropDialog());
+        btnAddCustomCrop.setOnClickListener(v ->
+                startActivity(new Intent(BrowseCropsActivity.this, AddCustomCropActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadAllItems();
+        applyFilters();
     }
 
     private void loadAllItems() {
-        allItems = new ArrayList<>(CropCatalog.getDefaultItems());
-        for (String[] custom : dbHelper.getCustomCropTypes()) {
-            allItems.add(new CropCatalogItem(custom[0], custom[1], true));
+        Set<String> hidden = dbHelper.getHiddenCropTypes();
+        List<CropCatalogItem> combined = new ArrayList<>();
+
+        for (CropCatalogItem defaultItem : CropCatalog.getDefaultItems()) {
+            if (hidden.contains(defaultItem.getName())) continue;
+            String overrideImage = dbHelper.getCropTypeImage(defaultItem.getName());
+            combined.add(new CropCatalogItem(defaultItem.getName(), defaultItem.getCategory(), false, overrideImage));
         }
+
+        for (String[] custom : dbHelper.getCustomCropTypes()) {
+            String imagePath = custom.length > 2 && !custom[2].isEmpty() ? custom[2] : dbHelper.getCropTypeImage(custom[0]);
+            combined.add(new CropCatalogItem(custom[0], custom[1], true, imagePath));
+        }
+
+        allItems = combined;
     }
 
     private void buildCategoryFilters() {
@@ -122,6 +144,7 @@ public class BrowseCropsActivity extends AppCompatActivity {
     }
 
     private void applyFilters() {
+        if (allItems == null) return;
         String searchTerm = etSearch.getText().toString().trim().toLowerCase();
         List<CropCatalogItem> filtered = new ArrayList<>();
 
@@ -139,49 +162,84 @@ public class BrowseCropsActivity extends AppCompatActivity {
         Intent result = new Intent();
         result.putExtra(EXTRA_CROP_NAME, item.getName());
         result.putExtra(EXTRA_CROP_CATEGORY, item.getCategory());
+        result.putExtra(EXTRA_CROP_IMAGE_PATH, item.getImagePath());
         setResult(RESULT_OK, result);
         finish();
     }
 
-    private void showAddCustomCropDialog() {
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        int padding = (int) (20 * getResources().getDisplayMetrics().density);
-        layout.setPadding(padding, padding, padding, padding);
-
-        EditText etName = new EditText(this);
-        etName.setHint("Crop name");
-        layout.addView(etName);
-
-        TextView tvCategoryLabel = new TextView(this);
-        tvCategoryLabel.setText("Category");
-        tvCategoryLabel.setPadding(0, 24, 0, 8);
-        layout.addView(tvCategoryLabel);
-
-        Spinner spinnerCategory = new Spinner(this);
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, CropCatalog.getCategories());
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(categoryAdapter);
-        layout.addView(spinnerCategory);
+    private void onCropLongPressed(CropCatalogItem item) {
+        List<String> options = new ArrayList<>();
+        options.add("Change Photo");
+        if (item.isCustom()) {
+            options.add("Delete Crop");
+        } else {
+            options.add("Hide from List");
+        }
 
         new AlertDialog.Builder(this)
-                .setTitle("Add Custom Crop")
-                .setView(layout)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String name = etName.getText().toString().trim();
-                    if (TextUtils.isEmpty(name)) {
-                        Toast.makeText(this, "Please enter a crop name", Toast.LENGTH_SHORT).show();
-                        return;
+                .setTitle(item.getName())
+                .setItems(options.toArray(new String[0]), (dialog, which) -> {
+                    String chosen = options.get(which);
+                    if ("Change Photo".equals(chosen)) {
+                        pendingImageCropName = item.getName();
+                        pickPhotoForType();
+                    } else if ("Delete Crop".equals(chosen)) {
+                        confirmDeleteCustomCrop(item.getName());
+                    } else if ("Hide from List".equals(chosen)) {
+                        confirmHideDefaultCrop(item.getName());
                     }
-                    if (!ValidationUtils.containsLetter(name)) {
-                        Toast.makeText(this, "Crop name must include letters, not just numbers", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    String category = spinnerCategory.getSelectedItem().toString();
-                    dbHelper.addCustomCropType(name, category);
-                    Toast.makeText(this, "Custom crop added", Toast.LENGTH_SHORT).show();
+                })
+                .show();
+    }
 
+    private void pickPhotoForType() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_PICK_PHOTO_FOR_TYPE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PICK_PHOTO_FOR_TYPE && resultCode == Activity.RESULT_OK && data != null) {
+            Uri selectedUri = data.getData();
+            if (selectedUri != null && pendingImageCropName != null) {
+                String savedPath = ImageStorageUtils.copyToInternalStorage(this, selectedUri);
+                if (savedPath != null) {
+                    dbHelper.setCropTypeImage(pendingImageCropName, savedPath);
+                    Toast.makeText(this, "Photo updated", Toast.LENGTH_SHORT).show();
+                    loadAllItems();
+                    applyFilters();
+                } else {
+                    Toast.makeText(this, "Could not load that photo. Please try another.", Toast.LENGTH_SHORT).show();
+                }
+            }
+            pendingImageCropName = null;
+        }
+    }
+
+    private void confirmDeleteCustomCrop(String cropName) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Crop")
+                .setMessage("Remove \"" + cropName + "\" from your crop list? This only removes it from " +
+                        "the picker — any crop records you've already saved under this name are kept.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    dbHelper.deleteCustomCropType(cropName);
+                    Toast.makeText(this, "Crop removed", Toast.LENGTH_SHORT).show();
+                    loadAllItems();
+                    applyFilters();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmHideDefaultCrop(String cropName) {
+        new AlertDialog.Builder(this)
+                .setTitle("Hide from List")
+                .setMessage("Hide \"" + cropName + "\" from your crop picker? You can still see any crop " +
+                        "records already saved under this name.")
+                .setPositiveButton("Hide", (dialog, which) -> {
+                    dbHelper.hideCropType(cropName);
+                    Toast.makeText(this, "Crop hidden", Toast.LENGTH_SHORT).show();
                     loadAllItems();
                     applyFilters();
                 })

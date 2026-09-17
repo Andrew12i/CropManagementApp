@@ -18,13 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cropmanagementapp.adapter.ActivityLogAdapter;
+import com.example.cropmanagementapp.adapter.IncomeAdapter;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
 import com.example.cropmanagementapp.model.ActivityLog;
 import com.example.cropmanagementapp.model.Crop;
+import com.example.cropmanagementapp.model.IncomeLog;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class CropDetailsActivity extends AppCompatActivity {
 
@@ -33,10 +36,12 @@ public class CropDetailsActivity extends AppCompatActivity {
     private Crop currentCrop;
 
     private TextView tvCropName, tvVariety, tvPlotName, tvStatusBadge, tvPlantingDate,
-            tvHarvestDate, tvAreaPlanted, tvTotalExpenses, tvNoActivities;
+            tvHarvestDate, tvAreaPlanted, tvTotalExpenses, tvTotalIncome, tvNetProfit,
+            tvNoActivities, tvNoIncome;
     private Button btnHarvestAction, btnUndoHarvest;
-    private RecyclerView rvActivities;
+    private RecyclerView rvActivities, rvIncome;
     private ActivityLogAdapter activityAdapter;
+    private IncomeAdapter incomeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,18 +59,27 @@ public class CropDetailsActivity extends AppCompatActivity {
         tvHarvestDate = findViewById(R.id.tvHarvestDate);
         tvAreaPlanted = findViewById(R.id.tvAreaPlanted);
         tvTotalExpenses = findViewById(R.id.tvTotalExpenses);
+        tvTotalIncome = findViewById(R.id.tvTotalIncome);
+        tvNetProfit = findViewById(R.id.tvNetProfit);
         tvNoActivities = findViewById(R.id.tvNoActivities);
+        tvNoIncome = findViewById(R.id.tvNoIncome);
         rvActivities = findViewById(R.id.rvActivities);
+        rvIncome = findViewById(R.id.rvIncome);
 
         Button btnEditCrop = findViewById(R.id.btnEditCrop);
         Button btnDeleteCrop = findViewById(R.id.btnDeleteCrop);
         Button btnAddActivity = findViewById(R.id.btnAddActivity);
+        Button btnAddIncome = findViewById(R.id.btnAddIncome);
         btnHarvestAction = findViewById(R.id.btnHarvestAction);
         btnUndoHarvest = findViewById(R.id.btnUndoHarvest);
 
         rvActivities.setLayoutManager(new LinearLayoutManager(this));
         activityAdapter = new ActivityLogAdapter(new java.util.ArrayList<>());
         rvActivities.setAdapter(activityAdapter);
+
+        rvIncome.setLayoutManager(new LinearLayoutManager(this));
+        incomeAdapter = new IncomeAdapter(new java.util.ArrayList<>());
+        rvIncome.setAdapter(incomeAdapter);
 
         btnEditCrop.setOnClickListener(v -> {
             Intent intent = new Intent(CropDetailsActivity.this, EditCropActivity.class);
@@ -81,6 +95,12 @@ public class CropDetailsActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        btnAddIncome.setOnClickListener(v -> {
+            Intent intent = new Intent(CropDetailsActivity.this, AddIncomeActivity.class);
+            intent.putExtra("crop_id", cropId);
+            startActivity(intent);
+        });
+
         btnHarvestAction.setOnClickListener(v -> showHarvestDialog());
         btnUndoHarvest.setOnClickListener(v -> confirmUndoHarvest());
     }
@@ -90,6 +110,7 @@ public class CropDetailsActivity extends AppCompatActivity {
         super.onResume();
         loadCropDetails();
         loadActivities();
+        loadIncome();
     }
 
     private void loadCropDetails() {
@@ -108,7 +129,13 @@ public class CropDetailsActivity extends AppCompatActivity {
         tvAreaPlanted.setText("Area planted: " + currentCrop.getAreaPlanted());
 
         double totalExpenses = dbHelper.getTotalExpensesForCrop(cropId);
-        tvTotalExpenses.setText(String.format("Total expenses logged: KES %.2f", totalExpenses));
+        double totalIncome = dbHelper.getTotalIncomeForCrop(cropId);
+        double netProfit = totalIncome - totalExpenses;
+
+        tvTotalExpenses.setText(String.format(Locale.getDefault(), "Total expenses logged: KES %.2f", totalExpenses));
+        tvTotalIncome.setText(String.format(Locale.getDefault(), "Total income: KES %.2f", totalIncome));
+        tvNetProfit.setText(String.format(Locale.getDefault(), "Net profit: KES %.2f", netProfit));
+        tvNetProfit.setTextColor(getResources().getColor(netProfit >= 0 ? R.color.green_primary : R.color.red_overdue));
 
         String badgeText;
         int color;
@@ -153,6 +180,19 @@ public class CropDetailsActivity extends AppCompatActivity {
         } else {
             tvNoActivities.setVisibility(View.GONE);
             rvActivities.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void loadIncome() {
+        List<IncomeLog> incomeList = dbHelper.getIncomeForCrop(cropId);
+        incomeAdapter.updateData(incomeList);
+
+        if (incomeList.isEmpty()) {
+            tvNoIncome.setVisibility(View.VISIBLE);
+            rvIncome.setVisibility(View.GONE);
+        } else {
+            tvNoIncome.setVisibility(View.GONE);
+            rvIncome.setVisibility(View.VISIBLE);
         }
     }
 
@@ -214,7 +254,7 @@ public class CropDetailsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Delete crop record")
                 .setMessage("This will permanently delete \"" + currentCrop.getCropName() +
-                        "\" and all its logged activities. This cannot be undone.")
+                        "\" and all its logged activities and income records. This cannot be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {
                     dbHelper.deleteCrop(cropId);
                     Toast.makeText(this, "Crop deleted", Toast.LENGTH_SHORT).show();

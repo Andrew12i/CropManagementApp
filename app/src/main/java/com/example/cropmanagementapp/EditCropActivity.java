@@ -21,6 +21,10 @@ import com.example.cropmanagementapp.model.Crop;
 
 import java.util.Calendar;
 
+/**
+ * Pre-fills the form with the existing crop record and saves changes
+ * back to the same row. Validation mirrors AddCropActivity.
+ */
 public class EditCropActivity extends AppCompatActivity {
 
     private static final int REQUEST_BROWSE_CROPS = 100;
@@ -33,6 +37,7 @@ public class EditCropActivity extends AppCompatActivity {
 
     private String selectedCropName = null;
     private String selectedCropCategory = null;
+    private String selectedCropImagePath = null;
     private String plantingDateIso = null;
     private String harvestDateIso = null;
 
@@ -78,10 +83,10 @@ public class EditCropActivity extends AppCompatActivity {
     private void populateFields() {
         selectedCropName = existingCrop.getCropName();
         selectedCropCategory = existingCrop.getCategory();
+        selectedCropImagePath = existingCrop.getImagePath();
         tvSelectedCropName.setText(selectedCropName);
         tvSelectedCropName.setTextColor(getResources().getColor(R.color.text_primary));
-        int imageRes = CropImageResolver.resolve(this, selectedCropName, selectedCropCategory);
-        ivSelectedCropImage.setImageResource(imageRes);
+        CropImageResolver.applyCropImage(ivSelectedCropImage, this, selectedCropName, selectedCropCategory, selectedCropImagePath);
 
         etVariety.setText(existingCrop.getVariety());
         etPlotName.setText(existingCrop.getPlotName());
@@ -99,9 +104,9 @@ public class EditCropActivity extends AppCompatActivity {
         if (requestCode == REQUEST_BROWSE_CROPS && resultCode == RESULT_OK && data != null) {
             selectedCropName = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_NAME);
             selectedCropCategory = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_CATEGORY);
+            selectedCropImagePath = data.getStringExtra(BrowseCropsActivity.EXTRA_CROP_IMAGE_PATH);
             tvSelectedCropName.setText(selectedCropName);
-            int imageRes = CropImageResolver.resolve(this, selectedCropName, selectedCropCategory);
-            ivSelectedCropImage.setImageResource(imageRes);
+            CropImageResolver.applyCropImage(ivSelectedCropImage, this, selectedCropName, selectedCropCategory, selectedCropImagePath);
         }
     }
 
@@ -180,6 +185,7 @@ public class EditCropActivity extends AppCompatActivity {
 
         existingCrop.setCropName(selectedCropName);
         existingCrop.setCategory(selectedCropCategory);
+        existingCrop.setImagePath(selectedCropImagePath);
         existingCrop.setVariety(variety);
         existingCrop.setPlotName(plotName);
         existingCrop.setPlantingDate(plantingDateIso);

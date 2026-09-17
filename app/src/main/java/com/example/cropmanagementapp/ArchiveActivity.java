@@ -6,10 +6,13 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.example.cropmanagementapp.adapter.ArchivedCropAdapter;
 import com.example.cropmanagementapp.db.DatabaseHelper;
@@ -57,6 +60,9 @@ public class ArchiveActivity extends AppCompatActivity {
             startActivity(intent);
         });
         rvArchivedCrops.setAdapter(adapter);
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        BottomNavHelper.setup(bottomNav, this, R.id.nav_archive);
     }
 
     @Override

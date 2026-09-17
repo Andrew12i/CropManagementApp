@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * The built-in list of crops, organized by category. Custom farmer-added
- * crops (stored in the database) are merged in separately by whoever
- * reads this catalog.
- */
 public class CropCatalog {
 
     public static final String CATEGORY_CEREALS = "Cereals";
@@ -27,23 +22,23 @@ public class CropCatalog {
         List<CropCatalogItem> items = new ArrayList<>();
 
         String[] cereals = {"Maize", "Wheat", "Rice (Paddy)", "Sorghum", "Millet", "Barley"};
-        for (String name : cereals) items.add(new CropCatalogItem(name, CATEGORY_CEREALS, false));
+        for (String name : cereals) items.add(new CropCatalogItem(name, CATEGORY_CEREALS, false, null));
 
         String[] pulses = {"Beans", "Green Grams", "Cowpeas", "Pigeon Peas", "Soybean", "Groundnuts"};
-        for (String name : pulses) items.add(new CropCatalogItem(name, CATEGORY_PULSES, false));
+        for (String name : pulses) items.add(new CropCatalogItem(name, CATEGORY_PULSES, false, null));
 
         String[] vegetables = {"Tomato", "Onion", "Cabbage", "Kale (Sukuma Wiki)", "Spinach",
                 "Carrot", "Capsicum / Pepper", "Pumpkin"};
-        for (String name : vegetables) items.add(new CropCatalogItem(name, CATEGORY_VEGETABLES, false));
+        for (String name : vegetables) items.add(new CropCatalogItem(name, CATEGORY_VEGETABLES, false, null));
 
         String[] fruits = {"Banana", "Avocado", "Mango", "Watermelon", "Passion Fruit", "Pineapple"};
-        for (String name : fruits) items.add(new CropCatalogItem(name, CATEGORY_FRUITS, false));
+        for (String name : fruits) items.add(new CropCatalogItem(name, CATEGORY_FRUITS, false, null));
 
         String[] cashCrops = {"Coffee", "Tea", "Macadamia", "Sugarcane", "Cotton", "Sunflower"};
-        for (String name : cashCrops) items.add(new CropCatalogItem(name, CATEGORY_CASH_CROPS, false));
+        for (String name : cashCrops) items.add(new CropCatalogItem(name, CATEGORY_CASH_CROPS, false, null));
 
         String[] other = {"Irish Potato", "Sweet Potato", "Cassava", "Napier Grass"};
-        for (String name : other) items.add(new CropCatalogItem(name, CATEGORY_OTHER, false));
+        for (String name : other) items.add(new CropCatalogItem(name, CATEGORY_OTHER, false, null));
 
         return items;
     }

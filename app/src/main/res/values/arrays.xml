@@ -48,4 +48,23 @@
         <item>Planting / gap-filling</item>
         <item>Other</item>
     </string-array>
+
+    <string-array name="security_questions">
+        <item>What is your favorite crop to grow?</item>
+        <item>Which crops grows best in your area</item>
+        <item>What is your mother\'s first name?</item>
+        <item>What town or village were you born in?</item>
+        <item>What is the name of your first animal or pet?</item>
+    </string-array>
+
+    <string-array name="income_units">
+        <item>Kg</item>
+        <item>Bags</item>
+        <item>Crates</item>
+        <item>Trays</item>
+        <item>Pieces</item>
+        <item>Litres</item>
+        <item>Tonnes</item>
+        <item>Other</item>
+    </string-array>
 </resources>

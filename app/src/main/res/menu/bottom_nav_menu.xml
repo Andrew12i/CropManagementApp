@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_home" android:title="Home" android:icon="@drawable/ic_nav_home" />
+    <item android:id="@+id/nav_my_crops" android:title="My Crops" android:icon="@drawable/ic_nav_crops" />
+    <item android:id="@+id/nav_archive" android:title="Harvested" android:icon="@drawable/ic_nav_archive" />
+    <item android:id="@+id/nav_finances" android:title="Finances" android:icon="@drawable/ic_nav_finance" />
+</menu>

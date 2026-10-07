@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.example.cropmanagementapp.adapter.CropAdapter;
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.auth.SessionManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
@@ -23,14 +24,15 @@ import java.util.List;
 
 /**
  * Dashboard / Home tab: shows quick totals and crops with harvests due
- * soon, plus entry points to add or browse crops. Settings (report +
- * logout) is reached via the hamburger icon.
+ * soon for the currently selected farm, plus entry points to add or
+ * browse crops. Settings (farms + report + logout) is via the hamburger.
  */
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
-    private TextView tvTotalCrops, tvTotalPlots, tvNoUpcoming;
+    private FarmManager farmManager;
+    private TextView tvTotalCrops, tvTotalPlots, tvNoUpcoming, tvCurrentFarm;
     private RecyclerView rvUpcomingHarvests;
     private CropAdapter adapter;
 
@@ -52,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         dbHelper = new DatabaseHelper(this);
+        farmManager = new FarmManager(this);
 
         tvTotalCrops = findViewById(R.id.tvTotalCrops);
         tvTotalPlots = findViewById(R.id.tvTotalPlots);
         tvNoUpcoming = findViewById(R.id.tvNoUpcoming);
+        tvCurrentFarm = findViewById(R.id.tvCurrentFarm);
         rvUpcomingHarvests = findViewById(R.id.rvUpcomingHarvests);
 
         Button btnAddCrop = findViewById(R.id.btnAddCrop);
@@ -92,14 +96,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadSummary() {
-        int totalCrops = dbHelper.getTotalCropCount();
-        int totalPlots = dbHelper.getDistinctPlotCount();
+        long farmId = farmManager.getCurrentFarmId();
+        tvCurrentFarm.setText(farmManager.getCurrentFarmName());
+
+        int totalCrops = dbHelper.getTotalCropCount(farmId);
+        int totalPlots = dbHelper.getDistinctPlotCount(farmId);
         tvTotalCrops.setText(String.valueOf(totalCrops));
         tvTotalPlots.setText(String.valueOf(totalPlots));
 
         String today = DateUtils.todayIso();
         String cutoff = DateUtils.isoDateNDaysFromNow(UPCOMING_WINDOW_DAYS);
-        List<Crop> upcoming = dbHelper.getUpcomingHarvests(today, cutoff);
+        List<Crop> upcoming = dbHelper.getUpcomingHarvests(today, cutoff, farmId);
 
         adapter.updateData(upcoming);
 

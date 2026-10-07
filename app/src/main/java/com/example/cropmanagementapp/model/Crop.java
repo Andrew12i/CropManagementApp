@@ -16,7 +16,9 @@ public class Crop {
     private String yieldAmount;         // free text, e.g. "800 kg"
     private String harvestedDate;       // stored as yyyy-MM-dd
     private String category;            // e.g. "Cereals", "Vegetables"
-    private String imagePath;           // real photo file path, if one was chosen
+    private String imagePath;           // real photo file path for the crop TYPE, if one was chosen
+    private long farmId;                // which farm this crop belongs to
+    private String recordPhotoPath;     // a photo of THIS specific planting/record
 
     public Crop() {
     }
@@ -56,4 +58,10 @@ public class Crop {
 
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+    public long getFarmId() { return farmId; }
+    public void setFarmId(long farmId) { this.farmId = farmId; }
+
+    public String getRecordPhotoPath() { return recordPhotoPath; }
+    public void setRecordPhotoPath(String recordPhotoPath) { this.recordPhotoPath = recordPhotoPath; }
 }

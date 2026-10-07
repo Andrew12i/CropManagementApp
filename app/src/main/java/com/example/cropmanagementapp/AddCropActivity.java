@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.catalog.CropImageResolver;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
@@ -38,6 +39,7 @@ public class AddCropActivity extends AppCompatActivity {
     private String harvestDateIso = null;
 
     private DatabaseHelper dbHelper;
+    private FarmManager farmManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class AddCropActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_crop);
 
         dbHelper = new DatabaseHelper(this);
+        farmManager = new FarmManager(this);
 
         cardSelectCrop = findViewById(R.id.cardSelectCrop);
         ivSelectedCropImage = findViewById(R.id.ivSelectedCropImage);
@@ -157,6 +160,7 @@ public class AddCropActivity extends AppCompatActivity {
         crop.setExpectedHarvestDate(harvestDateIso);
         crop.setAreaPlanted(areaPlanted);
         crop.setImagePath(selectedCropImagePath);
+        crop.setFarmId(farmManager.getCurrentFarmId());
 
         long id = dbHelper.addCrop(crop);
         if (id > 0) {

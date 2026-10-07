@@ -11,19 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.example.cropmanagementapp.adapter.FinanceAdapter;
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.model.FinanceEntry;
 
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Farm-wide finance view: total income, total expenses, and net profit
- * across every crop (active and harvested), plus a per-crop breakdown.
- */
 public class FinancesActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
+    private FarmManager farmManager;
     private TextView tvFarmTotalIncome, tvFarmTotalExpenses, tvFarmNetProfit, tvNoFinances;
     private RecyclerView rvFinanceBreakdown;
     private FinanceAdapter adapter;
@@ -34,6 +32,7 @@ public class FinancesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_finances);
 
         dbHelper = new DatabaseHelper(this);
+        farmManager = new FarmManager(this);
 
         tvFarmTotalIncome = findViewById(R.id.tvFarmTotalIncome);
         tvFarmTotalExpenses = findViewById(R.id.tvFarmTotalExpenses);
@@ -56,8 +55,10 @@ public class FinancesActivity extends AppCompatActivity {
     }
 
     private void loadFinances() {
-        double totalIncome = dbHelper.getTotalIncomeAllCrops();
-        double totalExpenses = dbHelper.getTotalExpensesAllCrops();
+        long farmId = farmManager.getCurrentFarmId();
+
+        double totalIncome = dbHelper.getTotalIncomeAllCrops(farmId);
+        double totalExpenses = dbHelper.getTotalExpensesAllCrops(farmId);
         double netProfit = totalIncome - totalExpenses;
 
         tvFarmTotalIncome.setText(String.format(Locale.getDefault(), "KES %.2f", totalIncome));
@@ -65,7 +66,7 @@ public class FinancesActivity extends AppCompatActivity {
         tvFarmNetProfit.setText(String.format(Locale.getDefault(), "KES %.2f", netProfit));
         tvFarmNetProfit.setTextColor(getResources().getColor(netProfit >= 0 ? R.color.green_primary : R.color.red_overdue));
 
-        List<FinanceEntry> breakdown = dbHelper.getFinanceBreakdown();
+        List<FinanceEntry> breakdown = dbHelper.getFinanceBreakdown(farmId);
         adapter.updateData(breakdown);
 
         if (breakdown.isEmpty()) {

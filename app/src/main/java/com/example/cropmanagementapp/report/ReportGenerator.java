@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
 
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
 import com.example.cropmanagementapp.model.ActivityLog;
@@ -21,9 +22,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builds a printable/shareable PDF summarising the whole farm: active
- * crops, harvest history with yields by plot, and total logged expenses.
- * Uses Android's built-in PdfDocument (no external library needed).
+ * Builds a printable/shareable PDF summarising the currently selected
+ * farm: active crops, harvest history with yields by plot, and total
+ * logged expenses. Uses Android's built-in PdfDocument (no external
+ * library needed).
  */
 public class ReportGenerator {
 
@@ -35,6 +37,7 @@ public class ReportGenerator {
 
     private final Context context;
     private final DatabaseHelper dbHelper;
+    private final FarmManager farmManager;
 
     private PdfDocument pdfDocument;
     private PdfDocument.Page currentPage;
@@ -47,6 +50,7 @@ public class ReportGenerator {
     public ReportGenerator(Context context) {
         this.context = context.getApplicationContext();
         this.dbHelper = new DatabaseHelper(this.context);
+        this.farmManager = new FarmManager(this.context);
         setupPaints();
     }
 
@@ -79,19 +83,23 @@ public class ReportGenerator {
         linePaint.setStrokeWidth(1);
     }
 
-    /** Builds the full farm report and saves it under the app's cache/reports folder. Returns the saved File. */
+    /** Builds the report for the currently selected farm and saves it under the app's cache/reports folder. */
     public File generateFarmReport() throws IOException {
+        long farmId = farmManager.getCurrentFarmId();
+        String farmName = farmManager.getCurrentFarmName();
+
         pdfDocument = new PdfDocument();
         pageNumber = 0;
         currentPage = null;
         startNewPage();
 
         drawLine("CropManagementApp — Farm Report", titlePaint, 14);
+        drawLine("Farm: " + farmName, subheadingPaint, 4);
         drawLine("Generated on " + DateUtils.toDisplayFormat(DateUtils.todayIso()), mutedPaint, 16);
 
         drawSectionDivider();
         drawLine("Active Crops Summary", headingPaint, 10);
-        List<Crop> activeCrops = dbHelper.getAllCrops(null);
+        List<Crop> activeCrops = dbHelper.getAllCrops(null, farmId);
         if (activeCrops.isEmpty()) {
             drawBody("No active crops currently recorded.");
         } else {
@@ -102,7 +110,7 @@ public class ReportGenerator {
 
         drawSectionDivider();
         drawLine("Harvest Archive & Yield Summary", headingPaint, 10);
-        List<Crop> harvestedCrops = dbHelper.getHarvestedCrops(null);
+        List<Crop> harvestedCrops = dbHelper.getHarvestedCrops(null, farmId);
         if (harvestedCrops.isEmpty()) {
             drawBody("No harvested crops recorded yet.");
         } else {

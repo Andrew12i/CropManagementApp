@@ -40,10 +40,11 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvCurrentFarm"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Keep every crop, plot and activity in one place"
+                        android:text="My Farm"
                         android:textColor="@color/green_light"
                         android:textSize="14sp" />
                 </LinearLayout>

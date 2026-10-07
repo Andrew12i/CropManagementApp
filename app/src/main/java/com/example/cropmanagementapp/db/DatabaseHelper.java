@@ -8,8 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.cropmanagementapp.model.ActivityLog;
 import com.example.cropmanagementapp.model.Crop;
-import com.example.cropmanagementapp.model.IncomeLog;
+import com.example.cropmanagementapp.model.Farm;
 import com.example.cropmanagementapp.model.FinanceEntry;
+import com.example.cropmanagementapp.model.IncomeLog;
 import com.example.cropmanagementapp.model.User;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Set;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "shamba_tracker.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public static final String TABLE_CROPS = "crops";
     public static final String COL_CROP_ID = "id";
@@ -35,6 +36,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_HARVESTED_DATE = "harvested_date";
     public static final String COL_CATEGORY = "category";
     public static final String COL_CROP_IMAGE_PATH = "image_path";
+    public static final String COL_CROP_FARM_ID = "farm_id";
+    public static final String COL_RECORD_PHOTO_PATH = "record_photo_path";
 
     public static final String TABLE_ACTIVITIES = "activities";
     public static final String COL_ACTIVITY_ID = "id";
@@ -81,12 +84,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_HIDDEN_CROPS = "hidden_crop_types";
     public static final String COL_HIDDEN_CROP_NAME = "crop_name";
 
+    public static final String TABLE_FARMS = "farms";
+    public static final String COL_FARM_ID = "id";
+    public static final String COL_FARM_NAME = "name";
+    public static final String COL_FARM_LOCATION = "location";
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + TABLE_FARMS + " (" +
+                COL_FARM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_FARM_NAME + " TEXT NOT NULL, " +
+                COL_FARM_LOCATION + " TEXT" +
+                ");");
+
         db.execSQL("CREATE TABLE " + TABLE_CROPS + " (" +
                 COL_CROP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_CROP_NAME + " TEXT NOT NULL, " +
@@ -99,7 +113,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_YIELD_AMOUNT + " TEXT, " +
                 COL_HARVESTED_DATE + " TEXT, " +
                 COL_CATEGORY + " TEXT, " +
-                COL_CROP_IMAGE_PATH + " TEXT" +
+                COL_CROP_IMAGE_PATH + " TEXT, " +
+                COL_CROP_FARM_ID + " INTEGER, " +
+                COL_RECORD_PHOTO_PATH + " TEXT" +
                 ");");
 
         db.execSQL("CREATE TABLE " + TABLE_ACTIVITIES + " (" +
@@ -156,6 +172,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TABLE_HIDDEN_CROPS + " (" +
                 COL_HIDDEN_CROP_NAME + " TEXT PRIMARY KEY" +
                 ");");
+
+        long defaultFarmId = insertDefaultFarm(db);
+        db.execSQL("UPDATE " + TABLE_CROPS + " SET " + COL_CROP_FARM_ID + " = " + defaultFarmId);
     }
 
     @Override
@@ -212,12 +231,118 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COL_HIDDEN_CROP_NAME + " TEXT PRIMARY KEY" +
                     ");");
         }
+        if (oldVersion < 6) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_FARMS + " (" +
+                    COL_FARM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COL_FARM_NAME + " TEXT NOT NULL, " +
+                    COL_FARM_LOCATION + " TEXT" +
+                    ");");
+            db.execSQL("ALTER TABLE " + TABLE_CROPS + " ADD COLUMN " + COL_CROP_FARM_ID + " INTEGER");
+            db.execSQL("ALTER TABLE " + TABLE_CROPS + " ADD COLUMN " + COL_RECORD_PHOTO_PATH + " TEXT");
+
+            long defaultFarmId = insertDefaultFarm(db);
+            db.execSQL("UPDATE " + TABLE_CROPS + " SET " + COL_CROP_FARM_ID + " = " + defaultFarmId +
+                    " WHERE " + COL_CROP_FARM_ID + " IS NULL");
+        }
+    }
+
+    private long insertDefaultFarm(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+        values.put(COL_FARM_NAME, "My Farm");
+        return db.insert(TABLE_FARMS, null, values);
     }
 
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
         db.setForeignKeyConstraintsEnabled(true);
+    }
+
+    // ---------------- FARM CRUD ----------------
+
+    public long addFarm(Farm farm) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_FARM_NAME, farm.getName());
+        values.put(COL_FARM_LOCATION, farm.getLocation());
+        long id = db.insert(TABLE_FARMS, null, values);
+        db.close();
+        return id;
+    }
+
+    public int updateFarm(Farm farm) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_FARM_NAME, farm.getName());
+        values.put(COL_FARM_LOCATION, farm.getLocation());
+        int rows = db.update(TABLE_FARMS, values, COL_FARM_ID + " = ?", new String[]{String.valueOf(farm.getId())});
+        db.close();
+        return rows;
+    }
+
+    /** Returns false (and does not delete) if the farm still has crop records. */
+    public boolean deleteFarmIfEmpty(long farmId) {
+        if (getCropCountForFarm(farmId) > 0) {
+            return false;
+        }
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_FARMS, COL_FARM_ID + " = ?", new String[]{String.valueOf(farmId)});
+        db.close();
+        return true;
+    }
+
+    public int getCropCountForFarm(long farmId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_CROPS + " WHERE " + COL_CROP_FARM_ID + " = ?",
+                new String[]{String.valueOf(farmId)});
+        int count = 0;
+        if (cursor.moveToFirst()) count = cursor.getInt(0);
+        cursor.close();
+        db.close();
+        return count;
+    }
+
+    public Farm getFarm(long farmId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_FARMS, null, COL_FARM_ID + " = ?",
+                new String[]{String.valueOf(farmId)}, null, null, null);
+        Farm farm = null;
+        if (cursor.moveToFirst()) farm = cursorToFarm(cursor);
+        cursor.close();
+        db.close();
+        return farm;
+    }
+
+    public List<Farm> getAllFarms() {
+        List<Farm> farms = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_FARMS, null, null, null, null, null, COL_FARM_NAME + " ASC");
+        if (cursor.moveToFirst()) {
+            do { farms.add(cursorToFarm(cursor)); } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return farms;
+    }
+
+    /** Ensures at least one farm exists, creating "My Farm" if needed. Returns a valid farm id. */
+    public long ensureDefaultFarm() {
+        List<Farm> farms = getAllFarms();
+        if (!farms.isEmpty()) {
+            return farms.get(0).getId();
+        }
+        SQLiteDatabase db = getWritableDatabase();
+        long id = insertDefaultFarm(db);
+        db.close();
+        return id;
+    }
+
+    private Farm cursorToFarm(Cursor cursor) {
+        Farm farm = new Farm();
+        farm.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_FARM_ID)));
+        farm.setName(cursor.getString(cursor.getColumnIndexOrThrow(COL_FARM_NAME)));
+        farm.setLocation(safeString(cursor, COL_FARM_LOCATION));
+        return farm;
     }
 
     // ---------------- USER / ACCOUNT CRUD ----------------
@@ -401,6 +526,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_IS_HARVESTED, 0);
         values.put(COL_CATEGORY, crop.getCategory());
         values.put(COL_CROP_IMAGE_PATH, crop.getImagePath());
+        values.put(COL_CROP_FARM_ID, crop.getFarmId());
+        values.put(COL_RECORD_PHOTO_PATH, crop.getRecordPhotoPath());
         long id = db.insert(TABLE_CROPS, null, values);
         db.close();
         return id;
@@ -417,10 +544,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_AREA_PLANTED, crop.getAreaPlanted());
         values.put(COL_CATEGORY, crop.getCategory());
         values.put(COL_CROP_IMAGE_PATH, crop.getImagePath());
+        values.put(COL_CROP_FARM_ID, crop.getFarmId());
         int rows = db.update(TABLE_CROPS, values, COL_CROP_ID + " = ?",
                 new String[]{String.valueOf(crop.getId())});
         db.close();
         return rows;
+    }
+
+    public void updateCropRecordPhoto(long cropId, String imagePath) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_RECORD_PHOTO_PATH, imagePath);
+        db.update(TABLE_CROPS, values, COL_CROP_ID + " = ?", new String[]{String.valueOf(cropId)});
+        db.close();
     }
 
     public void markCropHarvested(long cropId, String harvestedDateIso, String yieldAmount) {
@@ -462,18 +598,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return crop;
     }
 
-    public List<Crop> getAllCrops(String searchTerm) {
+    public List<Crop> getAllCrops(String searchTerm, long farmId) {
         List<Crop> crops = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor;
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             String like = "%" + searchTerm.trim() + "%";
             cursor = db.query(TABLE_CROPS, null,
-                    COL_IS_HARVESTED + " = 0 AND (" + COL_CROP_NAME + " LIKE ? OR " + COL_PLOT_NAME + " LIKE ?)",
-                    new String[]{like, like}, null, null, COL_HARVEST_DATE + " ASC");
+                    COL_IS_HARVESTED + " = 0 AND " + COL_CROP_FARM_ID + " = ? AND (" + COL_CROP_NAME + " LIKE ? OR " + COL_PLOT_NAME + " LIKE ?)",
+                    new String[]{String.valueOf(farmId), like, like}, null, null, COL_HARVEST_DATE + " ASC");
         } else {
-            cursor = db.query(TABLE_CROPS, null, COL_IS_HARVESTED + " = 0", null, null, null,
-                    COL_HARVEST_DATE + " ASC");
+            cursor = db.query(TABLE_CROPS, null, COL_IS_HARVESTED + " = 0 AND " + COL_CROP_FARM_ID + " = ?",
+                    new String[]{String.valueOf(farmId)}, null, null, COL_HARVEST_DATE + " ASC");
         }
         if (cursor.moveToFirst()) {
             do { crops.add(cursorToCrop(cursor)); } while (cursor.moveToNext());
@@ -483,18 +619,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return crops;
     }
 
-    public List<Crop> getHarvestedCrops(String searchTerm) {
+    public List<Crop> getHarvestedCrops(String searchTerm, long farmId) {
         List<Crop> crops = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor;
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             String like = "%" + searchTerm.trim() + "%";
             cursor = db.query(TABLE_CROPS, null,
-                    COL_IS_HARVESTED + " = 1 AND (" + COL_CROP_NAME + " LIKE ? OR " + COL_PLOT_NAME + " LIKE ?)",
-                    new String[]{like, like}, null, null, COL_HARVESTED_DATE + " DESC");
+                    COL_IS_HARVESTED + " = 1 AND " + COL_CROP_FARM_ID + " = ? AND (" + COL_CROP_NAME + " LIKE ? OR " + COL_PLOT_NAME + " LIKE ?)",
+                    new String[]{String.valueOf(farmId), like, like}, null, null, COL_HARVESTED_DATE + " DESC");
         } else {
-            cursor = db.query(TABLE_CROPS, null, COL_IS_HARVESTED + " = 1", null, null, null,
-                    COL_HARVESTED_DATE + " DESC");
+            cursor = db.query(TABLE_CROPS, null, COL_IS_HARVESTED + " = 1 AND " + COL_CROP_FARM_ID + " = ?",
+                    new String[]{String.valueOf(farmId)}, null, null, COL_HARVESTED_DATE + " DESC");
         }
         if (cursor.moveToFirst()) {
             do { crops.add(cursorToCrop(cursor)); } while (cursor.moveToNext());
@@ -519,6 +655,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         crop.setHarvestedDate(safeString(cursor, COL_HARVESTED_DATE));
         crop.setCategory(safeString(cursor, COL_CATEGORY));
         crop.setImagePath(safeString(cursor, COL_CROP_IMAGE_PATH));
+        crop.setRecordPhotoPath(safeString(cursor, COL_RECORD_PHOTO_PATH));
+
+        int farmIdx = cursor.getColumnIndexOrThrow(COL_CROP_FARM_ID);
+        crop.setFarmId(cursor.isNull(farmIdx) ? -1 : cursor.getLong(farmIdx));
 
         return crop;
     }
@@ -651,9 +791,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // ---------------- SUMMARY QUERIES ----------------
 
-    public int getTotalCropCount() {
+    public int getTotalCropCount(long farmId) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_CROPS + " WHERE " + COL_IS_HARVESTED + " = 0", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_CROPS + " WHERE " + COL_IS_HARVESTED + " = 0 AND " + COL_CROP_FARM_ID + " = ?",
+                new String[]{String.valueOf(farmId)});
         int count = 0;
         if (cursor.moveToFirst()) count = cursor.getInt(0);
         cursor.close();
@@ -661,10 +802,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count;
     }
 
-    public int getDistinctPlotCount() {
+    public int getDistinctPlotCount(long farmId) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(DISTINCT " + COL_PLOT_NAME + ") FROM " + TABLE_CROPS +
-                " WHERE " + COL_IS_HARVESTED + " = 0", null);
+                " WHERE " + COL_IS_HARVESTED + " = 0 AND " + COL_CROP_FARM_ID + " = ?", new String[]{String.valueOf(farmId)});
         int count = 0;
         if (cursor.moveToFirst()) count = cursor.getInt(0);
         cursor.close();
@@ -672,12 +813,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count;
     }
 
-    public List<Crop> getUpcomingHarvests(String todayDate, String cutoffDate) {
+    public List<Crop> getUpcomingHarvests(String todayDate, String cutoffDate, long farmId) {
         List<Crop> crops = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_CROPS, null,
-                COL_IS_HARVESTED + " = 0 AND " + COL_HARVEST_DATE + " >= ? AND " + COL_HARVEST_DATE + " <= ?",
-                new String[]{todayDate, cutoffDate}, null, null, COL_HARVEST_DATE + " ASC");
+                COL_IS_HARVESTED + " = 0 AND " + COL_CROP_FARM_ID + " = ? AND " + COL_HARVEST_DATE + " >= ? AND " + COL_HARVEST_DATE + " <= ?",
+                new String[]{String.valueOf(farmId), todayDate, cutoffDate}, null, null, COL_HARVEST_DATE + " ASC");
         if (cursor.moveToFirst()) {
             do { crops.add(cursorToCrop(cursor)); } while (cursor.moveToNext());
         }
@@ -686,30 +827,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return crops;
     }
 
-    // ---------------- FARM-WIDE FINANCE SUMMARY ----------------
-
-    public double getTotalIncomeAllCrops() {
+    public double getTotalIncomeAllCrops(long farmId) {
         double total = 0;
-        for (Crop crop : getAllCrops(null)) total += getTotalIncomeForCrop(crop.getId());
-        for (Crop crop : getHarvestedCrops(null)) total += getTotalIncomeForCrop(crop.getId());
+        for (Crop crop : getAllCrops(null, farmId)) total += getTotalIncomeForCrop(crop.getId());
+        for (Crop crop : getHarvestedCrops(null, farmId)) total += getTotalIncomeForCrop(crop.getId());
         return total;
     }
 
-    public double getTotalExpensesAllCrops() {
+    public double getTotalExpensesAllCrops(long farmId) {
         double total = 0;
-        for (Crop crop : getAllCrops(null)) total += getTotalExpensesForCrop(crop.getId());
-        for (Crop crop : getHarvestedCrops(null)) total += getTotalExpensesForCrop(crop.getId());
+        for (Crop crop : getAllCrops(null, farmId)) total += getTotalExpensesForCrop(crop.getId());
+        for (Crop crop : getHarvestedCrops(null, farmId)) total += getTotalExpensesForCrop(crop.getId());
         return total;
     }
 
-    /** Per-crop income/expense/net breakdown across ALL crops (active and harvested). */
-    public List<FinanceEntry> getFinanceBreakdown() {
+    public List<FinanceEntry> getFinanceBreakdown(long farmId) {
         List<FinanceEntry> entries = new ArrayList<>();
-        for (Crop crop : getAllCrops(null)) {
+        for (Crop crop : getAllCrops(null, farmId)) {
             entries.add(new FinanceEntry(crop.getCropName(), crop.getPlotName(),
                     getTotalIncomeForCrop(crop.getId()), getTotalExpensesForCrop(crop.getId())));
         }
-        for (Crop crop : getHarvestedCrops(null)) {
+        for (Crop crop : getHarvestedCrops(null, farmId)) {
             entries.add(new FinanceEntry(crop.getCropName(), crop.getPlotName(),
                     getTotalIncomeForCrop(crop.getId()), getTotalExpensesForCrop(crop.getId())));
         }

@@ -1,14 +1,19 @@
 package com.example.cropmanagementapp;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cropmanagementapp.adapter.ActivityLogAdapter;
 import com.example.cropmanagementapp.adapter.IncomeAdapter;
+import com.example.cropmanagementapp.catalog.ImageStorageUtils;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
 import com.example.cropmanagementapp.model.ActivityLog;
@@ -39,6 +45,11 @@ public class CropDetailsActivity extends AppCompatActivity {
             tvHarvestDate, tvAreaPlanted, tvTotalExpenses, tvTotalIncome, tvNetProfit,
             tvNoActivities, tvNoIncome;
     private Button btnHarvestAction, btnUndoHarvest;
+    private FrameLayout frameRecordPhoto;
+    private ImageView ivRecordPhoto;
+    private TextView tvRecordPhotoHint;
+
+    private static final int REQUEST_PICK_RECORD_PHOTO = 600;
     private RecyclerView rvActivities, rvIncome;
     private ActivityLogAdapter activityAdapter;
     private IncomeAdapter incomeAdapter;
@@ -72,6 +83,9 @@ public class CropDetailsActivity extends AppCompatActivity {
         Button btnAddIncome = findViewById(R.id.btnAddIncome);
         btnHarvestAction = findViewById(R.id.btnHarvestAction);
         btnUndoHarvest = findViewById(R.id.btnUndoHarvest);
+        frameRecordPhoto = findViewById(R.id.frameRecordPhoto);
+        ivRecordPhoto = findViewById(R.id.ivRecordPhoto);
+        tvRecordPhotoHint = findViewById(R.id.tvRecordPhotoHint);
 
         rvActivities.setLayoutManager(new LinearLayoutManager(this));
         activityAdapter = new ActivityLogAdapter(new java.util.ArrayList<>());
@@ -103,6 +117,30 @@ public class CropDetailsActivity extends AppCompatActivity {
 
         btnHarvestAction.setOnClickListener(v -> showHarvestDialog());
         btnUndoHarvest.setOnClickListener(v -> confirmUndoHarvest());
+        frameRecordPhoto.setOnClickListener(v -> pickRecordPhoto());
+    }
+
+    private void pickRecordPhoto() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_PICK_RECORD_PHOTO);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PICK_RECORD_PHOTO && resultCode == Activity.RESULT_OK && data != null) {
+            Uri selectedUri = data.getData();
+            if (selectedUri != null) {
+                String savedPath = ImageStorageUtils.copyToInternalStorage(this, selectedUri);
+                if (savedPath != null) {
+                    dbHelper.updateCropRecordPhoto(cropId, savedPath);
+                    Toast.makeText(this, "Photo saved", Toast.LENGTH_SHORT).show();
+                    loadCropDetails();
+                } else {
+                    Toast.makeText(this, "Could not load that photo. Please try another.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     @Override
@@ -119,6 +157,21 @@ public class CropDetailsActivity extends AppCompatActivity {
             Toast.makeText(this, "This crop record no longer exists.", Toast.LENGTH_SHORT).show();
             finish();
             return;
+        }
+
+
+        if (!TextUtils.isEmpty(currentCrop.getRecordPhotoPath())) {
+            java.io.File file = new java.io.File(currentCrop.getRecordPhotoPath());
+            if (file.exists()) {
+                ivRecordPhoto.setImageURI(Uri.fromFile(file));
+                tvRecordPhotoHint.setVisibility(View.GONE);
+            } else {
+                ivRecordPhoto.setImageURI(null);
+                tvRecordPhotoHint.setVisibility(View.VISIBLE);
+            }
+        } else {
+            ivRecordPhoto.setImageURI(null);
+            tvRecordPhotoHint.setVisibility(View.VISIBLE);
         }
 
         tvCropName.setText(currentCrop.getCropName());

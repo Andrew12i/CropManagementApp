@@ -36,6 +36,7 @@
         <activity android:name=".AddIncomeActivity" android:exported="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
         <activity android:name=".FinancesActivity" android:exported="false" />
+        <activity android:name=".FarmsActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

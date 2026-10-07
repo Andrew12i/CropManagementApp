@@ -6,15 +6,15 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
-import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.example.cropmanagementapp.adapter.ArchivedCropAdapter;
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.model.Crop;
 import com.example.cropmanagementapp.view.YieldBarChartView;
@@ -26,14 +26,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Lists harvested crops (the season's history), shows a bar chart
- * comparing total yield by plot, and a matching text summary, so a
- * farmer can compare seasons at a glance or read exact numbers.
- */
 public class ArchiveActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
+    private FarmManager farmManager;
     private RecyclerView rvArchivedCrops;
     private LinearLayout llYieldSummary;
     private YieldBarChartView chartYieldByPlot;
@@ -48,6 +44,7 @@ public class ArchiveActivity extends AppCompatActivity {
         setContentView(R.layout.activity_archive);
 
         dbHelper = new DatabaseHelper(this);
+        farmManager = new FarmManager(this);
         rvArchivedCrops = findViewById(R.id.rvArchivedCrops);
         llYieldSummary = findViewById(R.id.llYieldSummary);
         chartYieldByPlot = findViewById(R.id.chartYieldByPlot);
@@ -72,7 +69,7 @@ public class ArchiveActivity extends AppCompatActivity {
     }
 
     private void loadArchive() {
-        List<Crop> harvested = dbHelper.getHarvestedCrops(null);
+        List<Crop> harvested = dbHelper.getHarvestedCrops(null, farmManager.getCurrentFarmId());
         adapter.updateData(harvested);
 
         if (harvested.isEmpty()) {

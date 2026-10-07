@@ -35,9 +35,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
+        LinearLayout rowSwitchFarm = findViewById(R.id.rowSwitchFarm);
         LinearLayout rowGenerateReport = findViewById(R.id.rowGenerateReport);
         LinearLayout rowLogout = findViewById(R.id.rowLogout);
 
+        rowSwitchFarm.setOnClickListener(v ->
+                startActivity(new Intent(SettingsActivity.this, FarmsActivity.class)));
         rowGenerateReport.setOnClickListener(v -> generateAndOfferReport());
         rowLogout.setOnClickListener(v -> confirmLogout());
     }

@@ -11,6 +11,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <FrameLayout
+            android:id="@+id/frameRecordPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="160dp">
+
+            <ImageView
+                android:id="@+id/ivRecordPhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Photo of this crop record"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/tvRecordPhotoHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="#55000000"
+                android:padding="12dp"
+                android:text="Tap to add a photo of this crop"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

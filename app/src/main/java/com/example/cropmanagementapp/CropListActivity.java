@@ -15,18 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.example.cropmanagementapp.adapter.CropAdapter;
+import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.model.Crop;
 
 import java.util.List;
 
-/**
- * Full crop list with a live search box that filters by crop name or plot
- * name as the farmer types.
- */
 public class CropListActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
+    private FarmManager farmManager;
     private RecyclerView rvCrops;
     private EditText etSearch;
     private TextView tvEmptyState;
@@ -38,6 +36,7 @@ public class CropListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_crop_list);
 
         dbHelper = new DatabaseHelper(this);
+        farmManager = new FarmManager(this);
         rvCrops = findViewById(R.id.rvCrops);
         etSearch = findViewById(R.id.etSearch);
         tvEmptyState = findViewById(R.id.tvEmptyState);
@@ -74,7 +73,7 @@ public class CropListActivity extends AppCompatActivity {
     }
 
     private void loadCrops(String searchTerm) {
-        List<Crop> crops = dbHelper.getAllCrops(searchTerm);
+        List<Crop> crops = dbHelper.getAllCrops(searchTerm, farmManager.getCurrentFarmId());
         adapter.updateData(crops);
 
         if (crops.isEmpty()) {

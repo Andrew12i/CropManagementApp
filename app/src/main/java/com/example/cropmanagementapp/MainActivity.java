@@ -13,12 +13,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.example.cropmanagementapp.adapter.CropAdapter;
 import com.example.cropmanagementapp.auth.FarmManager;
 import com.example.cropmanagementapp.auth.SessionManager;
 import com.example.cropmanagementapp.db.DatabaseHelper;
 import com.example.cropmanagementapp.db.DateUtils;
 import com.example.cropmanagementapp.model.Crop;
+import com.example.cropmanagementapp.notifications.CropAlarmScheduler;
+import com.example.cropmanagementapp.notifications.CropCheckReceiver;
 
 import java.util.List;
 
@@ -85,6 +94,19 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class)));
 
         BottomNavHelper.setup(bottomNav, this, R.id.nav_home);
+
+        requestNotificationPermissionIfNeeded();
+        CropAlarmScheduler.scheduleDaily(this);
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 2001);
+            }
+        }
     }
 
     @Override
@@ -92,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (dbHelper != null) {
             loadSummary();
+            new Thread(() -> CropCheckReceiver.runCheck(getApplicationContext())).start();
         }
     }
 

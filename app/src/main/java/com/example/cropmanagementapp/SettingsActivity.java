@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -13,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.example.cropmanagementapp.auth.SessionManager;
+import com.example.cropmanagementapp.notifications.CropAlarmScheduler;
+import com.example.cropmanagementapp.notifications.NotificationPrefs;
 import com.example.cropmanagementapp.report.PdfPrintDocumentAdapter;
 import com.example.cropmanagementapp.report.ReportGenerator;
 
@@ -27,6 +30,7 @@ import java.io.IOException;
 public class SettingsActivity extends AppCompatActivity {
 
     private SessionManager sessionManager;
+    private NotificationPrefs notificationPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,18 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         sessionManager = new SessionManager(this);
+        notificationPrefs = new NotificationPrefs(this);
+
+        Switch switchReminders = findViewById(R.id.switchReminders);
+        switchReminders.setChecked(notificationPrefs.isEnabled());
+        switchReminders.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            notificationPrefs.setEnabled(isChecked);
+            if (isChecked) {
+                CropAlarmScheduler.scheduleDaily(SettingsActivity.this);
+            } else {
+                CropAlarmScheduler.cancel(SettingsActivity.this);
+            }
+        });
 
         LinearLayout rowSwitchFarm = findViewById(R.id.rowSwitchFarm);
         LinearLayout rowGenerateReport = findViewById(R.id.rowGenerateReport);
